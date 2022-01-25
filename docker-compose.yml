@@ -1,50 +1,33 @@
-version: '3.8'
+version: '3'
 
 services:
-  elasticsearch:
-    image: elasticsearch:7.8.0
-    container_name: es
-    environment:
-      discovery.type: single-node
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    healthcheck:
-      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
-    networks:
-      - elastic
-  logstash:
-    image: logstash:7.8.0
-    container_name: log
-    environment:
-      discovery.seed_hosts: logstash
-      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+  cardano-node:
+    image: inputoutput/cardano-node
     volumes:
-      - ./logstash/pipeline/logstash-nginx.config:/usr/share/logstash/pipeline/logstash-nginx.config
-      - ./logstash/nginx.log:/home/nginx.log
-    ports:
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "5044:5044"
-      - "9600:9600"
+     - ./cardano-testnet-1097911063/_data:/data
+     - node-ipc:/ipc
+    environment:
+      - NETWORK=testnet
+
+  cardano-cli:
+    image: inputoutput/cardano-node
+    volumes:
+      - node-ipc:/ipc:ro
+    tty: true
+    stdin_open: true
+    environment:
+      - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
+    command: cli
+    profiles:
+      - cardano-cli
     depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-    command: logstash -f /usr/share/logstash/pipeline/logstash-nginx.config
-  kibana:
-    image: kibana:7.8.0
-    container_name: kib
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-networks:
-  elastic:
-    driver: bridge
+      - cardano-node
+
+  plutus-starter-kit:
+    image: inputoutput/plutus-starter-devcontainer
+
+volumes:
+  cardon_node_data:
+    external: true
+  node-ipc:
+    external: true
