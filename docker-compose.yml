@@ -9,7 +9,7 @@ services:
     environment:
       - NETWORK=testnet
 
-  cardano-cli:
+  cardano:
     image: inputoutput/cardano-node
     volumes:
       - node-ipc:/ipc:ro
@@ -19,15 +19,13 @@ services:
       - CARDANO_NODE_SOCKET_PATH=/ipc/node.socket
     command: cli
     profiles:
-      - cardano-cli
+      - cardano
     depends_on:
       - cardano-node
 
-  plutus-starter-kit:
+  plutus:
     image: inputoutput/plutus-starter-devcontainer
 
 volumes:
-  cardon_node_data:
-    external: true
   node-ipc:
     external: true
