@@ -1,8 +1,11 @@
 tasks:
   - init: |
       docker-compose pull
-  - command: |
-      docker-compose up
+  - name: Start syncing the testnet with cardano-node
+    command: docker-compose up
+  - name: Client where we will write queries.
+    command: docker-compose run cardano cli query tip --testnet-magic 1097911063
+    openMode: tab-after
 
 
 ports:
